@@ -82,13 +82,13 @@ int inet_csk_get_port(struct inet_hashinfo *hashinfo,
 		int low = sysctl_local_port_range[0];
 		int high = sysctl_local_port_range[1];
 		int remaining = (high - low) + 1;
-		int rover = net_random() % (high - low) + low;
+		int rover = net_random() % (high - low) + low; //随机选取一个循环起点
 
 		do {
-			head = &hashinfo->bhash[inet_bhashfn(rover, hashinfo->bhash_size)];
+			head = &hashinfo->bhash[inet_bhashfn(rover, hashinfo->bhash_size)]; // 获取端口号对应的哈希表表头，哈希算法就是“端口号%哈希表长度”
 			spin_lock(&head->lock);
-			inet_bind_bucket_for_each(tb, node, &head->chain)
-				if (tb->port == rover)
+			inet_bind_bucket_for_each(tb, node, &head->chain) // 从头遍历哈希桶
+				if (tb->port == rover) // 一旦该列表中有相同的端口号（已经被绑定了）则继续轮询下一个
 					goto next;
 			break;
 		next:

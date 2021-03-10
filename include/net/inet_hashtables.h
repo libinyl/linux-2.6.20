@@ -73,11 +73,11 @@ struct inet_ehash_bucket {
  * users logged onto your box, isn't it nice to know that new data
  * ports are created in O(1) time?  I thought so. ;-)	-DaveM
  */
-struct inet_bind_bucket {
+struct inet_bind_bucket {       // 表示一个已经被绑定了的端口，每一个已绑定端口对应一个该结构
 	unsigned short		port;
 	signed short		fastreuse;
-	struct hlist_node	node;
-	struct hlist_head	owners;
+	struct hlist_node	node;   //用于将inet_bind_bucket结构组织成哈希列表
+	struct hlist_head	owners; // 端口被分配给了哪个套接字。由于端口可能被多个套接字复用，所以这里使用哈希链表. 该链表的元素为struct tcp_sock
 };
 
 #define inet_bind_bucket_for_each(tb, node, head) \
@@ -91,8 +91,8 @@ struct inet_bind_hashbucket {
 /* This is for listening sockets, thus all sockets which possess wildcards. */
 #define INET_LHTABLE_SIZE	32	/* Yes, really, this is all you need. */
 
-struct inet_hashinfo {
-	/* This is for sockets with full identity only.  Sockets here will
+struct inet_hashinfo {    //inet_hashinfo是TCP层面的多个哈希表的集合，下面只列出了和端口管理相关的字段
+    /* This is for sockets with full identity only.  Sockets here will
 	 * always be without wildcards and will have the following invariant:
 	 *
 	 *          TCP_ESTABLISHED <= sk->sk_state < TCP_CLOSE
@@ -105,9 +105,9 @@ struct inet_hashinfo {
 	/* Ok, let's try this, I give up, we do need a local binding
 	 * TCP hash as well as the others for fast bind/connect.
 	 */
-	struct inet_bind_hashbucket	*bhash;
+	struct inet_bind_hashbucket	*bhash;     //指向已绑定端口哈希表，哈希表占用内存在tcp_init()中分配
 
-	int				bhash_size;
+	int				bhash_size;             //bhash哈希表的桶大小，必要时会扩大哈希表的容量以提升效率
 	unsigned int			ehash_size;
 
 	/* All sockets in TCP_LISTEN state will be in here.  This is the only
@@ -125,7 +125,7 @@ struct inet_hashinfo {
 	rwlock_t			lhash_lock ____cacheline_aligned;
 	atomic_t			lhash_users;
 	wait_queue_head_t		lhash_wait;
-	struct kmem_cache			*bind_bucket_cachep;
+	struct kmem_cache			*bind_bucket_cachep; 	//指向一个用于分配struct inet_bind_bucket的高速缓存，该缓存同样在tcp_init()中创建
 };
 
 static inline struct inet_ehash_bucket *inet_ehash_bucket(
