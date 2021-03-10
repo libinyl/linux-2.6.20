@@ -833,10 +833,10 @@ static inline void hlist_add_after_rcu(struct hlist_node *prev,
 
 /**
  * hlist_for_each_entry	- iterate over list of given type
- * @tpos:	the type * to use as a loop cursor.
- * @pos:	the &struct hlist_node to use as a loop cursor.
- * @head:	the head for your list.
- * @member:	the name of the hlist_node within the struct.
+ * @tpos:	the type * to use as a loop cursor. 用来存放遍历到的数据结构的地址，类型是type *；
+ * @pos:	the &struct hlist_node to use as a loop cursor. struct hlist_node类型的一个指针, 专门用于链表的前后指向
+ * @head:	the head for your list. hlist链表的头结点；
+ * @member:	the name of the hlist_node within the struct. struct hlist_node在type结构体中的变量的名称。hlist.png
  */
 #define hlist_for_each_entry(tpos, pos, head, member)			 \
 	for (pos = (head)->first;					 \
